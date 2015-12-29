@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import papua as papua
 import numpy as np
 import matplotlib.pyplot as plt
