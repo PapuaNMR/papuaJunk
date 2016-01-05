@@ -1,0 +1,18 @@
+##TITLE= Parameter file, TOPSPIN		Version 2.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 13	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ 2015-12-23 22:46:25.174 -0500  nmrsu@didinium
+$$ /opt/topspin/data/scott/nmr/IsdC_BB/10/acqu2
+$$ process /opt/topspin/prog/mod/dataserver
+##$BF1= 60.845097
+##$FnMODE= 6
+##$NUC1= <15N>
+##$O1= 7058.031252
+##$SFO1= 60.852155031252
+##$SW= 32
+##$SW_h= 2190.68523631634
+##$TD= 4
+##END=
