@@ -21,10 +21,7 @@ def getArgs():
 #	output_file = args['output_file']
         return args
 
-
-
 args = getArgs() 
-
 
 if args['input_file']:
 	file = open(args['input_file'], 'rb').read()
@@ -33,19 +30,16 @@ else:
 
 length = len(file)/4
 
-header = np.frombuffer(file, 'float32', 512)
-if header[2] - 2.345 > 1e-6:
-	header = header.byteswap()
-
 data = np.fromfile(args['input_file'], 'float32')
 if data[2] - 2.345 > 1e-6:  # check for byteswap
     data = data.byteswap()
 
+header = data[:512]
 data =  data[512:]
-print data
-
-
-#data = np.frombuffer(file, dtype='float32', count=(length-512), offset=513)
+if args['base']:
+	base = args['base']
+else:
+	base = np.amax(data)/15
 
 dic = papua.fdata2dic(header)
 
@@ -57,18 +51,16 @@ yn = dic['FDSPECNUM']
 fdquad = dic['FDQUADFLAG']
 fdtrans = dic['FDTRANSPOSED']
 order1 = dic['FDDIMORDER1']
-print "xn = ", xn, "and yn = ", yn, "and FDQUADFLAG is ", fdquad, "and FDTRANSPOSED is ", fdtrans, "and order1 = ", order1
-print data.shape
+#print "xn = ", xn, "and yn = ", yn, "and FDQUADFLAG is ", fdquad, "and FDTRANSPOSED is ", fdtrans, "and order1 = ", order1
+#print data.shape
 data2D = np.reshape(data, (yn, xn))
-
-
-#print data2D.shape
-print data2D[21,101]
-
 fig = plt.figure()
 spec = fig.add_subplot(111)
-cl = float(args['base']) * float(args['factor']) ** np.arange(int(args['number_of_levels'])) 
-print cl
+cl = float(base) * float(args['factor']) ** np.arange(int(args['number_of_levels'])) 
+#print cl
 cmap = colormap.Blues_r
 spec.contour(data2D, cl, cmap=cmap) 
 plt.show()
+
+#n, bins, patches = plt.hist(data, bins=range(-10,100000000, 100000))
+#plt.show()
