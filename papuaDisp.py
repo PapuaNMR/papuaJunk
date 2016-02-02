@@ -56,7 +56,7 @@ order1 = dic['FDDIMORDER1']
 #print "xn = ", xn, "and yn = ", yn, "and FDQUADFLAG is ", fdquad, "and FDTRANSPOSED is ", fdtrans, "and order1 = ", order1
 #print data.shape
 data2D = np.reshape(data, (yn, xn))
-fig = plt.figure(figsize=(3,3), dpi=300)
+fig = plt.figure(figsize=(2,2), dpi=300)
 spec = fig.add_subplot(111)
 cl = float(base) * float(args['factor']) ** np.arange(int(args['number_of_levels'])) 
 #print cl
