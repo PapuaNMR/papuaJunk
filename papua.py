@@ -1,4 +1,8 @@
 import struct
+import numpy as np
+import sys 
+from scipy.ndimage.filters import maximum_filter
+
 # dictionary of pipe parameters
 fdata_dic = {
 'FDMAGIC': 0,
@@ -203,3 +207,106 @@ def fdata2dic(fdata):
     dic["FDOPERNAME"] = struct.unpack('32s', fdata[464:472])[0].rstrip('\x00')
     return dic
 
+def readnmrPipe(infile):
+	if infile:
+		data = np.fromfile(infile, 'float32')
+	else:
+		stdin = sys.stdin.read()
+		data = np.frombuffer(stdin, dtype=np.float32)
+	if data[2] - 2.345 > 1e-6:  # check for byteswap
+		data = data.byteswap()
+
+	#header = data[:512]
+	#data =  data[512:]
+
+	return data[:512], data[512:]
+
+def findPeaks(data, threshold, size=3, mode='wrap'):
+	peaks = []
+	if (data.size == 0) or (data.max() < threshold):
+		return peaks
+
+	boolsVal = data > threshold
+
+	maxFilter = maximum_filter(data, size=size, mode=mode)
+	boolsMax = data == maxFilter
+
+	boolsPeak = boolsVal & boolsMax
+
+	indices = np.argwhere(boolsPeak)
+
+	for position in indices:
+		position = tuple(position)
+		height = data[position]
+		peak = Peak(position, data, height)
+		peaks.append(peak)
+
+	return peaks
+
+
+class Peak:
+	def __init__(self, position, data, dataHeight=None, linewidth=None):
+		self.position = tuple(position)
+		self.data = data
+		self.point = tuple([int (round(x)) for x in position])
+
+		if dataHeight is None:
+			dataHeight = data[self.point]
+		self.dataHeight = dataHeight
+
+		if linewidth is None:
+			linewidth = self._calcHalfHeightWidth()
+		self.linewidth = linewidth
+
+		self.fitAmplitude = None
+		self.fitPosition = None
+		self.fitLineWidth = None
+
+	def _calcHalfHeightWidth(self):
+
+		dimWidths = []
+
+		for dim in range(self.data.ndim):
+			posA, posB = self._findHalfPoints(dim)
+			width = posB-posA
+			dimWidths.append(width)
+
+		return dimWidths
+
+	def _findHalfPoints(self, dim):
+
+		height = abs(self.dataHeight)
+		halfHt = 0.5 * height
+		data = self.data
+		point = self.point
+
+		testPoint = list(point)
+		posA = posB = point[dim]
+
+		prevValue = height
+		while posA > 0:
+			posA -= 1
+			testPoint[dim] = posA
+			value = abs(data[tuple(testPoint)])
+
+			if value <= halfHt:
+				posA += (halfHt-value)/(prevValue-value)
+				break
+
+			prevValue = value
+
+		lastPoint = data.shape[dim] - 1
+		
+		prevValue = height
+		while posB < lastPoint-1:
+			posB +=1
+			testPoint[dim] = posB
+			value = abs(data[tuple(testPoint)])
+
+			if value <= halfHt:
+				posB -+ (halfHt-value)/(prevValue-value)
+				break
+			
+			prevValue = value
+
+		return posA, posB

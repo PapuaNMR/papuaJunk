@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+
 import papua as papua
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,21 +25,9 @@ def getArgs():
 
 args = getArgs() 
 
-if args['input_file']:
-#	file = open(args['input_file'], 'rb').read()
-	data = np.fromfile(args['input_file'], 'float32')
-else:
-	stdin = sys.stdin.read()
-	data = np.frombuffer(stdin, dtype=np.float32)
+header, data = papua.readnmrPipe(args['input_file'])
 
-#length = len(file)/4
 
-#`data = np.fromfile(args['input_file'], 'float32')
-if data[2] - 2.345 > 1e-6:  # check for byteswap
-    data = data.byteswap()
-
-header = data[:512]
-data =  data[512:]
 if args['base']:
 	base = args['base']
 else:
@@ -50,22 +40,26 @@ dim = dic['FDDIMCOUNT']
 #Number of points in F2 (x dimension)
 xn = dic['FDSIZE']
 yn = dic['FDSPECNUM']
-fdquad = dic['FDQUADFLAG']
-fdtrans = dic['FDTRANSPOSED']
-order1 = dic['FDDIMORDER1']
+#fdquad = dic['FDQUADFLAG']
+#fdtrans = dic['FDTRANSPOSED']
+#order1 = dic['FDDIMORDER1']
 #print "xn = ", xn, "and yn = ", yn, "and FDQUADFLAG is ", fdquad, "and FDTRANSPOSED is ", fdtrans, "and order1 = ", order1
-#print data.shape
 data2D = np.reshape(data, (yn, xn))
+
+threshold = 0.2 * data2D.max()
+
+peaks = papua.findPeaks(data2D, threshold, size=3, mode='wrap')
+
 fig = plt.figure(figsize=(3,3), dpi=300)
 spec = fig.add_subplot(111)
 cl = float(base) * float(args['factor']) ** np.arange(int(args['number_of_levels'])) 
-#print cl
 cmap = colormap.Blues_r
 spec.contour(data2D, cl, cmap=cmap) 
-#plt.xticks(fontsize = 5)
-#plt.yticks(fontsize = 5)
+
+for peak in peaks:
+	x,y = peak.position
+	spec.plot(y,x,'r.',markersize=2)
+
+
 plt.tick_params(labelsize=6)
 plt.show()
-
-#n, bins, patches = plt.hist(data, bins=range(-10,100000000, 100000))
-#plt.show()
