@@ -45,16 +45,12 @@ yn = dic['FDSPECNUM']
 #order1 = dic['FDDIMORDER1']
 #print "xn = ", xn, "and yn = ", yn, "and FDQUADFLAG is ", fdquad, "and FDTRANSPOSED is ", fdtrans, "and order1 = ", order1
 data2D = np.reshape(data, (yn, xn))
-<<<<<<< HEAD
 
 threshold = 0.2 * data2D.max()
 
 peaks = papua.findPeaks(data2D, threshold, size=3, mode='wrap')
 
-fig = plt.figure(figsize=(3,3), dpi=300)
-=======
 fig = plt.figure(figsize=(2,2), dpi=300)
->>>>>>> origin/master
 spec = fig.add_subplot(111)
 cl = float(base) * float(args['factor']) ** np.arange(int(args['number_of_levels'])) 
 cmap = colormap.Blues_r
