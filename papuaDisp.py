@@ -59,7 +59,8 @@ spec.contour(data2D, cl, cmap=cmap)
 for peak in peaks:
 	x,y = peak.position
 	spec.plot(y,x,'r.',markersize=2)
-
+	peak.fit(fitWidth=3)
+	print peak.position, peak.fitPosition, peak.dataHeight, peak.fitAmplitude, peak.linewidth, peak.fitLinewidth
 
 plt.tick_params(labelsize=6)
 plt.show()
