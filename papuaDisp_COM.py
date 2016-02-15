@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-
+# peak picking using cetner of mass. It kinda sucks
 import papua as papua
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as colormap
 import os, sys, argparse, struct
+from scipy import ndimage
 
 # get the commandline options/flags
 
@@ -48,7 +49,15 @@ data2D = np.reshape(data, (yn, xn))
 
 threshold = 0.2 * data2D.max()
 
-peaks = papua.findPeaks(data2D, threshold, size=3, mode='wrap')
+#peaks = papua.findPeaks(data2D, threshold, size=3, mode='wrap')
+
+thresh = data2D <  data2D.max()/20
+data2D[thresh] = 0
+
+lbl, num_com = ndimage.label(data2D)
+
+
+com_peaks = ndimage.measurements.center_of_mass(data2D, lbl, np.arange(1,(num_com+1)))
 
 fig = plt.figure(figsize=(2,2), dpi=300)
 spec = fig.add_subplot(111)
@@ -56,11 +65,15 @@ cl = float(base) * float(args['factor']) ** np.arange(int(args['number_of_levels
 cmap = colormap.Blues_r
 spec.contour(data2D, cl, cmap=cmap) 
 
-for peak in peaks:
-	x,y = peak.position
+#for peak in peaks:
+#	x,y = peak.position
+#	spec.plot(y,x,'r.',markersize=2)
+#	peak.fit(fitWidth=11)
+#	print peak.position, peak.fitPosition, peak.dataHeight, peak.fitAmplitude, peak.linewidth, peak.fitLinewidth
+
+for peak in com_peaks:
+	x,y = peak[0], peak[1]
 	spec.plot(y,x,'r.',markersize=2)
-	peak.fit(fitWidth=11)
-	print peak.position, peak.fitPosition, peak.dataHeight, peak.fitAmplitude, peak.linewidth, peak.fitLinewidth
 
 plt.tick_params(labelsize=6)
 plt.show()
