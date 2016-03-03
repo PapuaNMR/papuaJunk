@@ -1,12 +1,30 @@
 #!/usr/bin/env python
-#import papua as papua
+import papua as papua
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 from scipy.optimize import curve_fit
 
+def getArgs():
+
+        parser = argparse.ArgumentParser(description='Fit Ca peaks to Pyruvate three-peak model')
+        parser.add_argument('-in', '--input_file', help='Input Data File')
+        args = vars(parser.parse_args())
+
+#        input_file = args['input_file']
+#       output_file = args['output_file']
+        return args
+
+args = getArgs()
+
+header, data = papua.readnmrPipe(args['input_file'])
+
+dic = papua.fdata2dic(header)
 
 
+print dic['FDF1LABEL']
+print dic['FDF2LABEL']
+print dic['FDF3LABEL']
 def pyruvate_func(x, k13, k2, s13, s2, m1, d):
 #	first_peak = (k1/s)*np.exp((-((x-m1)**2))/(2*(s**2)))
 #	second_peak = (k2/s)*np.exp((-((x-m2)**2))/(2*(s**2)))
