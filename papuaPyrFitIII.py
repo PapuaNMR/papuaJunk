@@ -171,6 +171,16 @@ while line_num < len(shifts_ppm):
 		p = params[0]
 		print 'Amino acid', shifts_ppm[line_num][0], p
 
+                xpredict = np.arange(0, 31.0, 0.01)
+                ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
+
+                plt.plot(x,Ca, linewidth=5.0)
+                plt.plot(xpredict, ypredict, linewidth=5.0)
+
+
+                plt.show()
+
+
 	except RuntimeError:
 		print("Error - curve_fit failed", 'Amino acid', shifts_ppm[line_num][0])
 	
