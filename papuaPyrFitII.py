@@ -6,6 +6,7 @@ import argparse
 from scipy.optimize import curve_fit
 
 
+
 ### Get the arguments
 
 def getArgs():
@@ -163,7 +164,7 @@ while line_num < len(shifts_ppm):
 			#	sigma=1.0/np.log(Ca),
 			#	absolute_sigma=False,
 			
-				bounds=([0.000*max, 0.5*max, 0.5, 0.5, 14, 3.7],[max, 2*max, 3, 3, 17, 5.1]),
+				bounds=([0.000*max, 0.5*max, 0.5, 0.5, 14, 2],[max, 2*max, 6, 6, 17, 6]),
 				method='dogbox',
 				max_nfev=10000
 				)
