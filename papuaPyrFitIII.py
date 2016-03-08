@@ -29,7 +29,7 @@ i = 0
 with open(args['shifts_file']) as f:
 	for row in f:
 		Data = row.split(';')
-		if Data[0] and  Data[1] and Data[3] and Data[4]:
+		if Data[0] and  Data[1] and Data[3] and Data[4] and Data[0][0] != '#':
 			shifts_ppm.append([Data[0], Data[1], Data[4], Data[3]]) # H C N order
 
 
@@ -158,7 +158,7 @@ while line_num < len(shifts_ppm):
 	
 	try:	
 		params = curve_fit(pyruvate_func, x, Ca, 
-				p0=([0.1*max, max, 1.5, 1.5, 16.5, 4.3]),
+				p0=([0.5*max, max, 1.5, 1.5, 16.5, 4.3]),
 			
 			#	sigma=1.0/np.log(Ca),
 			#	absolute_sigma=False,
@@ -169,7 +169,11 @@ while line_num < len(shifts_ppm):
 				)
 
 		p = params[0]
-		print 'Amino acid', shifts_ppm[line_num][0], p
+		SDerr = np.sqrt(np.diag(params[1]))
+		print 'Line number', line_num, 'Amino acid', shifts_ppm[line_num][0], p
+
+		fit_font = {'fontname':'monospace', 'size':'9'}
+
 
                 xpredict = np.arange(0, 31.0, 0.01)
                 ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
@@ -177,8 +181,21 @@ while line_num < len(shifts_ppm):
                 plt.plot(x,Ca, linewidth=5.0)
                 plt.plot(xpredict, ypredict, linewidth=5.0)
 
+		plt.figtext(.15,.85,'k13='+'%.3E' % p[0]+' +/- '+'%.3E' % SDerr[0], **fit_font)
+		plt.figtext(.15,.80,'k2 ='+'%.3E' % p[1]+' +/- '+'%.3E' % SDerr[1], **fit_font)
+		plt.figtext(.15,.75,'s13='+'%.3E' % p[2]+' +/- '+'%.3E' % SDerr[2], **fit_font)
+		plt.figtext(.15,.70,'s2 ='+'%.3E' % p[3]+' +/- '+'%.3E' % SDerr[3], **fit_font)
+		plt.figtext(.15,.65,'cen='+'%.3E' % p[4]+' +/- '+'%.3E' % SDerr[4], **fit_font)
+		plt.figtext(.15,.60,'dis='+'%.3E' % p[5]+' +/- '+'%.3E' % SDerr[5], **fit_font)
 
-                plt.show()
+
+
+
+
+
+		plt.savefig('fittings/Res_'+shifts_ppm[line_num][0]+'.png')
+		plt.close()
+                #plt.show()
 
 
 	except RuntimeError:
