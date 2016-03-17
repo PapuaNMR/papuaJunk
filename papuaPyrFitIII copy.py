@@ -15,8 +15,13 @@ def getArgs():
         parser = argparse.ArgumentParser(description='Fit Ca peaks to Pyruvate three-peak model')
         parser.add_argument('-data', '--data_file', help='Input Data File')
 	parser.add_argument('-shifts', '--shifts_file', help='Input shifts file (csv file)')
+<<<<<<< Updated upstream
 	parser.add_argument('-seq', '--sequence_file', help='Sequence file (one letter, new line)')
 	args = vars(parser.parse_args())
+=======
+	parser.add_argument('-seq', '--sequence_file', help='Input Sequence File')
+        args = vars(parser.parse_args())
+>>>>>>> Stashed changes
 
 #        input_file = args['input_file']
 #       output_file = args['output_file']
