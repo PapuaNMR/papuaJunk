@@ -154,7 +154,7 @@ while line_num < len(shifts_ppm):
 	z_point, x_point = bestCoord
 
 	#print z_point, x_point
-
+	
 	Ca = data3D[z_point,(y_point-16):(y_point+17),x_point]
 
 
@@ -174,66 +174,69 @@ while line_num < len(shifts_ppm):
 
 	x = np.arange(33.0)
 	max = Ca.max()
+
+
+	if max > 20000000:
+
+		try:	
+			params = curve_fit(pyruvate_func, x, Ca, 
+					p0=([0.35*max, max, 1.5, 1.5, 16.5, 4.3]),
+			
+				#	sigma=1.0/np.log(Ca),
+				#	absolute_sigma=False,
+			
+					bounds=([0.000*max, 0.5*max, 1.0, 1.0, 14, 3.0],[0.6*max, 1.22*max, 3.0, 3.0, 17, 5.8]),
+					method='dogbox',
+					max_nfev=10000
+					)
+
+			p = params[0]
+			SDerr = np.sqrt(np.diag(params[1]))
+			print 'Line number', line_num, 'Amino acid', shifts_ppm[line_num][0], p
 	
-	try:	
-		params = curve_fit(pyruvate_func, x, Ca, 
-				p0=([0.35*max, max, 1.5, 1.5, 16.5, 4.3]),
-			
-			#	sigma=1.0/np.log(Ca),
-			#	absolute_sigma=False,
-			
-				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 14, 3.0],[max, 2*max, 2.0, 2.0, 17, 5.8]),
-				method='dogbox',
-				max_nfev=10000
-				)
-
-		p = params[0]
-		SDerr = np.sqrt(np.diag(params[1]))
-		print 'Line number', line_num, 'Amino acid', shifts_ppm[line_num][0], p
-
-		fit_font = {'fontname':'monospace', 'size':'9'}
+			fit_font = {'fontname':'monospace', 'size':'9'}
 
 
-                xpredict = np.arange(0, 31.0, 0.01)
-                ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
+               		xpredict = np.arange(0, 31.0, 0.01)
+                	ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
 
 
-		if SDerr[0]/p[0] <= 0.5:
+			if SDerr[0]/p[0] <= 0.5 and SDerr[1]/p[1] <= 0.5:
 
-	                plt.plot(x,Ca, linewidth=5.0)
-        	        plt.plot(xpredict, ypredict, linewidth=5.0)
+	     	           	plt.plot(x,Ca, linewidth=5.0)
+        	        	plt.plot(xpredict, ypredict, linewidth=5.0)
 
-			plt.figtext(.15,.85,'k13='+'%.3E' % p[0]+' +/- '+'%.3E' % SDerr[0], **fit_font)
-			plt.figtext(.15,.80,'k2 ='+'%.3E' % p[1]+' +/- '+'%.3E' % SDerr[1], **fit_font)
-			plt.figtext(.15,.75,'s13='+'%.3E' % p[2]+' +/- '+'%.3E' % SDerr[2], **fit_font)
-			plt.figtext(.15,.70,'s2 ='+'%.3E' % p[3]+' +/- '+'%.3E' % SDerr[3], **fit_font)
-			plt.figtext(.15,.65,'cen='+'%.3E' % p[4]+' +/- '+'%.3E' % SDerr[4], **fit_font)
-			plt.figtext(.15,.60,'dis='+'%.3E' % p[5]+' +/- '+'%.3E' % SDerr[5], **fit_font)
-			plt.figtext(.15,.87,sequence[int(shifts_ppm[line_num][0])-1]+str(int(shifts_ppm[line_num][0])), **fit_font)
+				plt.figtext(.15,.85,'k13='+'%.3E' % p[0]+' +/- '+'%.3E' % SDerr[0], **fit_font)
+				plt.figtext(.15,.80,'k2 ='+'%.3E' % p[1]+' +/- '+'%.3E' % SDerr[1], **fit_font)
+				plt.figtext(.15,.75,'s13='+'%.3E' % p[2]+' +/- '+'%.3E' % SDerr[2], **fit_font)
+				plt.figtext(.15,.70,'s2 ='+'%.3E' % p[3]+' +/- '+'%.3E' % SDerr[3], **fit_font)
+				plt.figtext(.15,.65,'cen='+'%.3E' % p[4]+' +/- '+'%.3E' % SDerr[4], **fit_font)
+				plt.figtext(.15,.60,'dis='+'%.3E' % p[5]+' +/- '+'%.3E' % SDerr[5], **fit_font)
+				plt.figtext(.15,.87,sequence[int(shifts_ppm[line_num][0])-1]+str(int(shifts_ppm[line_num][0])), **fit_font)
 
-			aa = sequence[int(shifts_ppm[line_num][0])-1]
-			num = shifts_ppm[line_num][0]
+				aa = sequence[int(shifts_ppm[line_num][0])-1]
+				num = shifts_ppm[line_num][0]
 
-			plt.savefig('fittings/'+aa+num+'.png')
-			plt.close()
+				plt.savefig('fittings/'+aa+num+'.png')
+				plt.close()
 		
-			res = sequence[int(shifts_ppm[line_num][0])-1]
-			spectra_amino_dic[res].append(p[0]/p[1]*100)
+				res = sequence[int(shifts_ppm[line_num][0])-1]
+				spectra_amino_dic[res].append(p[0]/p[1]*100)
 
-	except RuntimeError:
-		print("Error - curve_fit failed", 'Amino acid', shifts_ppm[line_num][0])
+		except RuntimeError:
+			print("Error - curve_fit failed", 'Amino acid', shifts_ppm[line_num][0])
 	
-		p = params[0]
+			p = params[0]
 
-		#xpredict = np.arange(0, 31.0, 0.01)
-		#ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
+			#xpredict = np.arange(0, 31.0, 0.01)
+			#ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
 
-		plt.plot(x,Ca, linewidth=5.0)
-		#plt.plot(xpredict, ypredict, linewidth=5.0)
+			plt.plot(x,Ca, linewidth=5.0)
+			#plt.plot(xpredict, ypredict, linewidth=5.0)
 
-	#	plt.plot(Ca)
+		#	plt.plot(Ca)
 
-		plt.show()
+			plt.show()
 
 	line_num += 1
 
@@ -283,7 +286,7 @@ for aa in spectra_amino_dic:
 
 	x = np.linspace(0, 100, 100)
 	y = mlab.normpdf(x,np.mean(spectra_amino_dic[aa]), np.std(spectra_amino_dic[aa]))
-	plt.imshow(np.outer(y,n), cmap='Greys')
+	plt.imshow(np.outer(y,n), cmap='Greys', aspect='auto')
 	plt.figtext(.15,.85,'Amino Acid: '+three_aa, **fit_font)
 	plt.savefig('fittings/Space_For_'+three_aa+'.pdf')
 	plt.close()
@@ -292,7 +295,7 @@ for aa in spectra_amino_dic:
 #print y, n 
 	#plt.imshow(aa_space, cmap='Greys')
 
-plt.imshow(aa_space, cmap='Greys')
+plt.imshow(aa_space, cmap='Greys', aspect='auto')
 plt.show()
 
 

@@ -102,7 +102,7 @@ while line_num < len(shifts_ppm):
 
 	x_right_ppm = xcar_ppm + 0.5*xsw_ppm
 
-	y_shift_ppm = y_shift_ppm - 5.0
+
 
 	x_point = round((1.0-((x_shift_ppm - xcar_ppm)/(x_right_ppm - xcar_ppm)))*(0.5*dic['FDF2FTSIZE']) - dic['FDF2X1'] + 0.0)
 
@@ -150,12 +150,12 @@ while line_num < len(shifts_ppm):
 	
 	try:	
 		params = curve_fit(pyruvate_func, x, Ca, 
-				p0=([0.35*max, max, 1.5, 1.5, 33.0, 8.6]),
+				p0=([0.35*max, max, 2.5, 2.5, 33.0, 10.5]),
 			
 			#	sigma=1.0/np.log(Ca),
 			#	absolute_sigma=False,
 			
-				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 29, 6.0],[max, 2*max, 4.0, 4.0, 37, 11.6]),
+				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 29, 8.5],[max, 2*max, 5.0, 5.0, 37, 12.5]),
 				method='dogbox',
 				max_nfev=10000
 				)
