@@ -2,7 +2,9 @@
 import papua as papua
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 import argparse
+import urllib2
 from scipy.optimize import curve_fit
 
 
@@ -13,7 +15,8 @@ def getArgs():
         parser = argparse.ArgumentParser(description='Fit Ca peaks to Pyruvate three-peak model')
         parser.add_argument('-data', '--data_file', help='Input Data File')
 	parser.add_argument('-shifts', '--shifts_file', help='Input shifts file (csv file)')
-        args = vars(parser.parse_args())
+	parser.add_argument('-seq', '--sequence_file', help='Sequence file (one letter, new line)')
+	args = vars(parser.parse_args())
 
 #        input_file = args['input_file']
 #       output_file = args['output_file']
@@ -33,6 +36,22 @@ with open(args['shifts_file']) as f:
 			shifts_ppm.append([Data[0], Data[1], Data[4], Data[3]]) # H C N order
 
 
+### Get sequence and create dictionary with entry for each amino acid
+
+spectra_amino_dic = {}
+sequence = []
+with open(args['sequence_file']) as f:
+	for row in f:
+		if row not in spectra_amino_dic:
+			spectra_amino_dic[row[:-1]] = []	
+		sequence.append(row[:-1])	
+
+
+
+
+
+#print spectra_amino_dic
+#print sequence
 
 
 ### Get the NMR spectrum 
@@ -158,12 +177,12 @@ while line_num < len(shifts_ppm):
 	
 	try:	
 		params = curve_fit(pyruvate_func, x, Ca, 
-				p0=([0.5*max, max, 1.5, 1.5, 16.5, 4.3]),
+				p0=([0.35*max, max, 1.5, 1.5, 16.5, 4.3]),
 			
 			#	sigma=1.0/np.log(Ca),
 			#	absolute_sigma=False,
 			
-				bounds=([0.000*max, 0.5*max, 0.5, 0.5, 14, 3.7],[max, 2*max, 3, 3, 17, 5.1]),
+				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 14, 3.0],[max, 2*max, 2.0, 2.0, 17, 5.8]),
 				method='dogbox',
 				max_nfev=10000
 				)
@@ -178,25 +197,28 @@ while line_num < len(shifts_ppm):
                 xpredict = np.arange(0, 31.0, 0.01)
                 ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
 
-                plt.plot(x,Ca, linewidth=5.0)
-                plt.plot(xpredict, ypredict, linewidth=5.0)
 
-		plt.figtext(.15,.85,'k13='+'%.3E' % p[0]+' +/- '+'%.3E' % SDerr[0], **fit_font)
-		plt.figtext(.15,.80,'k2 ='+'%.3E' % p[1]+' +/- '+'%.3E' % SDerr[1], **fit_font)
-		plt.figtext(.15,.75,'s13='+'%.3E' % p[2]+' +/- '+'%.3E' % SDerr[2], **fit_font)
-		plt.figtext(.15,.70,'s2 ='+'%.3E' % p[3]+' +/- '+'%.3E' % SDerr[3], **fit_font)
-		plt.figtext(.15,.65,'cen='+'%.3E' % p[4]+' +/- '+'%.3E' % SDerr[4], **fit_font)
-		plt.figtext(.15,.60,'dis='+'%.3E' % p[5]+' +/- '+'%.3E' % SDerr[5], **fit_font)
+		if SDerr[0]/p[0] <= 0.5:
 
+	                plt.plot(x,Ca, linewidth=5.0)
+        	        plt.plot(xpredict, ypredict, linewidth=5.0)
 
+			plt.figtext(.15,.85,'k13='+'%.3E' % p[0]+' +/- '+'%.3E' % SDerr[0], **fit_font)
+			plt.figtext(.15,.80,'k2 ='+'%.3E' % p[1]+' +/- '+'%.3E' % SDerr[1], **fit_font)
+			plt.figtext(.15,.75,'s13='+'%.3E' % p[2]+' +/- '+'%.3E' % SDerr[2], **fit_font)
+			plt.figtext(.15,.70,'s2 ='+'%.3E' % p[3]+' +/- '+'%.3E' % SDerr[3], **fit_font)
+			plt.figtext(.15,.65,'cen='+'%.3E' % p[4]+' +/- '+'%.3E' % SDerr[4], **fit_font)
+			plt.figtext(.15,.60,'dis='+'%.3E' % p[5]+' +/- '+'%.3E' % SDerr[5], **fit_font)
+			plt.figtext(.15,.87,sequence[int(shifts_ppm[line_num][0])-1]+str(int(shifts_ppm[line_num][0])), **fit_font)
 
+			aa = sequence[int(shifts_ppm[line_num][0])-1]
+			num = shifts_ppm[line_num][0]
 
-
-
-		plt.savefig('fittings/Res_'+shifts_ppm[line_num][0]+'.png')
-		plt.close()
-                #plt.show()
-
+			plt.savefig('fittings/'+aa+num+'.png')
+			plt.close()
+		
+			res = sequence[int(shifts_ppm[line_num][0])-1]
+			spectra_amino_dic[res].append(p[0]/p[1]*100)
 
 	except RuntimeError:
 		print("Error - curve_fit failed", 'Amino acid', shifts_ppm[line_num][0])
@@ -214,3 +236,63 @@ while line_num < len(shifts_ppm):
 		plt.show()
 
 	line_num += 1
+
+for key in spectra_amino_dic:
+	if len(spectra_amino_dic[key]) != 0:
+		print key, np.mean(spectra_amino_dic[key]), np.std(spectra_amino_dic[key]), len(spectra_amino_dic[key])
+		x = np.linspace(np.mean(spectra_amino_dic[key])-4*np.std(spectra_amino_dic[key]), np.mean(spectra_amino_dic[key])+4*np.std(spectra_amino_dic[key]), 100)
+		y = mlab.normpdf(x,np.mean(spectra_amino_dic[key]), np.std(spectra_amino_dic[key]))
+		#y = y/y.max()
+		plt.fill_between(x,y, 0, alpha=0.25)
+plt.savefig('fittings/distros.pdf')
+plt.show()
+
+
+#### Now lets gather the BMRB chemical shift into for CAs
+
+
+aa_space = np.zeros((100, 549))
+
+
+for aa in spectra_amino_dic:
+
+
+	three_aa = papua.aa_dic[aa][0]
+
+	response = urllib2.urlopen('http://www.bmrb.wisc.edu/ftp/pub/bmrb/statistics/chem_shifts/selected/aasel/'+three_aa+'_CA_link.txt')
+
+	html = response.read().splitlines()
+
+	shifts = []
+
+	for line in html:
+        	fields =  line.split()
+		shifts.append(float(fields[0]))
+
+	npshifts = np.array(shifts)
+
+	#spaces = np.arange(npshifts.min(), npshifts.max(), 0.1)
+	spaces = np.arange(20, 75, 0.1)
+	n, bins, patches = plt.hist(npshifts, spaces)
+	plt.close()
+#A = np.array([0, 0, 1, 2, 1, 0, 0])
+#B = np.array([0, 1, 2, 1, 0, 0, 0])
+
+#print np.outer(A, B)a
+
+
+	x = np.linspace(0, 100, 100)
+	y = mlab.normpdf(x,np.mean(spectra_amino_dic[aa]), np.std(spectra_amino_dic[aa]))
+	plt.imshow(np.outer(y,n), cmap='Greys')
+	plt.figtext(.15,.85,'Amino Acid: '+three_aa, **fit_font)
+	plt.savefig('fittings/Space_For_'+three_aa+'.pdf')
+	plt.close()
+	aa_space = aa_space + np.outer(y,n)
+	#aa_space = aa_space/aa_space.max()
+#print y, n 
+	#plt.imshow(aa_space, cmap='Greys')
+
+plt.imshow(aa_space, cmap='Greys')
+plt.show()
+
+

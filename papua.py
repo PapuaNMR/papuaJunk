@@ -4,6 +4,32 @@ import sys
 from scipy.ndimage.filters import maximum_filter
 from scipy import optimize
 
+# dictionary of amino acids
+
+aa_dic = {
+		'A': ['ALA', 'Alanine'],
+		'C': ['CYS', 'Cysteine'],
+		'D': ['ASP', 'Aspartate'],
+		'E': ['GLU', 'Glutamate'],
+		'F': ['PHE', 'Phenylalanine'],
+		'G': ['GLY', 'Glycine'],
+		'H': ['HIS', 'Histidine'],
+		'I': ['ILE', 'Isoleucine'],
+		'K': ['LYS', 'Lysine'],
+		'L': ['LEU', 'Leucine'],
+		'M': ['MET', 'Methionine'],
+		'N': ['ASN', 'Asparagine'],
+		'P': ['PRO', 'Proline'],
+		'Q': ['GLN', 'Glutamine'],
+		'R': ['ARG', 'Arginine'],
+		'S': ['SER', 'Serine'],
+		'T': ['THR', 'Threonine'],
+		'V': ['VAL', 'Valine'],
+		'W': ['TRP', 'Tryptophan'],
+		'Y': ['TYR', 'Tyrosine']
+		}
+
+
 # dictionary of pipe parameters
 fdata_dic = {
 'FDMAGIC': 0,
