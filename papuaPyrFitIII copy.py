@@ -222,7 +222,7 @@ while line_num < len(shifts_ppm):
 				aa = sequence[int(shifts_ppm[line_num][0])-1]
 				num = shifts_ppm[line_num][0]
 
-				plt.savefig('fittings/'+aa+num+'.png')
+				plt.savefig('fittings/'+aa+num+'.pdf')
 				plt.close()
 		
 				res = sequence[int(shifts_ppm[line_num][0])-1]
