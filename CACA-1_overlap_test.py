@@ -16,6 +16,7 @@ def getArgs():
 
 
 args = getArgs()
+Seq = []
 CA = []
 CAm1 = []
 with open(args['shift_file']) as f:
@@ -23,17 +24,18 @@ with open(args['shift_file']) as f:
 		Data = row.split()
 		if len(Data) == 7 and Data[0][0] != '#':
 			num = int(re.findall("[-+]?\d+[\.]?\d*", Data[0])[0])
+			
 			if Data[0].find('-N-H') != -1: # CA shifts
-				CA.append([num, float(Data[4])])
+				CA.append([Data[0][0]+str(num), float(Data[4])])
+				Seq.append(Data[0][0])
 
 			else: # CA-1 shifts
-
 				CAm1.append([num, float(Data[4])])
 
 
-#print CA
+print CA
 #print CAm1
-
+#print Seq
 res = []
 for CAshift in CA:
 	thisdata = [CAshift[0]]
