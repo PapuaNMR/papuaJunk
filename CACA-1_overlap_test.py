@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
+import os
 import argparse
 import re
 import numpy as np
+import matplotlib.pyplot as plt
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+
 
 def getArgs():
 	parser = argparse.ArgumentParser(description='COmpare CA and CA-1 for overlaps over entire list')
@@ -26,16 +32,16 @@ with open(args['shift_file']) as f:
 			num = int(re.findall("[-+]?\d+[\.]?\d*", Data[0])[0])
 			
 			if Data[0].find('-N-H') != -1: # CA shifts
-				CA.append([Data[0][0]+str(num), float(Data[4])])
+				CA.append([num, float(Data[4])])
 				Seq.append(Data[0][0])
 
 			else: # CA-1 shifts
 				CAm1.append([num, float(Data[4])])
 
 
-print CA
+#print CA
 #print CAm1
-#print Seq
+print Seq
 res = []
 for CAshift in CA:
 	thisdata = [CAshift[0]]
@@ -56,6 +62,22 @@ for data in res:
 	list.append(num)
 
 
-
+print res
 print np.mean(list)
 print np.std(list)
+
+canvas = canvas.Canvas("assignable.pdf", pagesize=letter)
+#canvas.setFont('Courier-Bold', 20)
+#canvas.drawString(25,750,"ABCDEFGHIJ ABCDEFGHIJ ABCDEFGHIJ ABCDEFGHIJ")
+textobject = canvas.beginText()
+textobject.setTextOrigin(0.5*inch, 10*inch)
+textobject.setFont("Courier-Bold", 20)
+for aa in Seq:
+	textobject.textOut(aa)
+	#print aa
+canvas.drawText(textobject)
+
+
+canvas.save()
+os.system('open assignable.pdf')
+
