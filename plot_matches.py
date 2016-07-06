@@ -33,4 +33,5 @@ bins = np.arange(min(MBP_4_8Hz), max(MBP_42Hz)+2)
 print bins
 plt.hist(combo, bins, label=['4.8 Hz Resolution', '35 Hz Resolution', '42 Hz Resolution'])
 plt.legend(loc='upper right')
+print len(MBP_42Hz)
 plt.show()

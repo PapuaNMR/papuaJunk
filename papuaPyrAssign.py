@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 from scipy.optimize import curve_fit
-
+import re
 
 ### Get the arguments
 
