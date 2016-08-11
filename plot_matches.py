@@ -1,8 +1,23 @@
 #!/usr/bin/env python
-
+import matplotlib
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt 
+from matplotlib.ticker import FuncFormatter
+
+
+def to_percent(y, position):
+    # Ignore the passed in position. This has the effect of scaling the default
+    # tick locations.
+    s = str(100 * y)
+
+    # The percent symbol needs escaping in latex
+    if matplotlib.rcParams['text.usetex'] is True:
+        return s + r'$\%$'
+    else:
+        return s + '%'
+
+
 
 GB1_42Hz = [2, 4, 3, 2, 1, 3, 1, 1, 1, 3, 3, 2, 1, 5, 3, 2, 2, 3, 1, 1, 3, 7, 5, 1, 5, 2, 3, 1, 4, 3, 1, 2, 3, 4, 4, 2, 1, 3, 2, 1, 1, 2, 3, 5, 1, 5, 3, 3, 4, 3, 5, 1, 2, 1, 4, 1]
 
@@ -20,9 +35,9 @@ MBP_4_8Hz = np.asarray([2, 1, 2, 2, 1, 1, 1, 1, 2, 1, 1, 3, 1, 4, 1, 1, 1, 2, 5,
 
 MBP_assign = np.asarray([0]*16 + [1]*275 + [2]*31)
 
-MBP_42Hz = np.clip(MBP_42Hz, 0, 8)
-MBP_35Hz = np.clip(MBP_35Hz, 0, 8)
-MBP_4_8Hz = np.clip(MBP_4_8Hz, 0, 8)
+#MBP_42Hz = np.clip(MBP_42Hz, 0, 8)
+#MBP_35Hz = np.clip(MBP_35Hz, 0, 8)
+#MBP_4_8Hz = np.clip(MBP_4_8Hz, 0, 8)
 
 
 
@@ -38,8 +53,14 @@ combo = np.column_stack((MBP_assign, MBP_4_8Hz, MBP_35Hz, MBP_42Hz))
 
 bins = np.arange(min(MBP_4_8Hz), max(MBP_42Hz)+2)
 print bins
-n, bins, patches = plt.hist(combo, bins, label=['Using Peak Shape', '4.8 Hz Resolution', '35 Hz Resolution', '42 Hz Resolution'])
-plt.ylim(0,322)
+n, bins, patches = plt.hist(combo, bins, label=['Using Peak Shape', '4.8 Hz Resolution', '35 Hz Resolution', '42 Hz Resolution'], normed=True)
+
+plt.ylim(0, 1.0)
+
+formatter = FuncFormatter(to_percent)
+
+plt.gca().yaxis.set_major_formatter(formatter)
+
 plt.legend(loc='upper right')
 print len(MBP_42Hz)
 print n, bins, patches

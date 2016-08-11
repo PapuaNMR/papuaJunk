@@ -223,7 +223,7 @@ plt.show()
 
 #### Now lets gather the BMRB chemical shift into for CAs
 
-
+print 'got here'
 aa_space = np.zeros((100, 549))
 
 
@@ -232,9 +232,14 @@ for aa in spectra_amino_dic:
 
 	three_aa = papua.aa_dic[aa][0]
 
+	print 'about to get response'
+
 	response = urllib2.urlopen('http://www.bmrb.wisc.edu/ftp/pub/bmrb/statistics/chem_shifts/selected/aasel/'+three_aa+'_CA_link.txt')
 
 	html = response.read().splitlines()
+
+
+	print 'dealt with respionse'
 
 	shifts = []
 
@@ -266,6 +271,7 @@ for aa in spectra_amino_dic:
 	#plt.imshow(aa_space, cmap='Greys')
 
 plt.imshow(aa_space, cmap='Greys')
+plt.savefig('fittings_hr/All_AA_Space.pdf')
 plt.show()
 
 
