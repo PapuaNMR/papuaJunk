@@ -116,7 +116,7 @@ while line_num < len(shifts_ppm):
 
 	for i in [x_point-2, x_point-1, x_point, x_point+1, x_point+2]:
 		for j in [z_point-2, z_point-1, z_point, z_point+1, z_point+2]:
-			Ca = data3D[j,(y_point-32):(y_point+34),i]
+			Ca = data3D[j,(y_point-64):(y_point+66),i]
 			if Ca.max() > maxCa:
 				maxCa = Ca.max()
 				bestCoord = [j, i]
@@ -128,7 +128,7 @@ while line_num < len(shifts_ppm):
 
 	#print z_point, x_point
 
-	Ca = data3D[z_point,(y_point-32):(y_point+34),x_point]
+	Ca = data3D[z_point,(y_point-64):(y_point+66),x_point]
 
 
 
@@ -145,17 +145,17 @@ while line_num < len(shifts_ppm):
 
 	#ymeasure = Ca[(890-13):(890+14)]
 
-	x = np.arange(66.0)
+	x = np.arange(130.0)
 	max = Ca.max()
 	
 	try:	
 		params = curve_fit(pyruvate_func, x, Ca, 
-				p0=([0.35*max, max, 2.5, 2.5, 33.0, 10.5]),
+				p0=([0.35*max, max, 2.5, 2.5, 66.0, 10.5]),
 			
 			#	sigma=1.0/np.log(Ca),
 			#	absolute_sigma=False,
 			
-				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 29, 8.5],[max, 2*max, 5.0, 5.0, 37, 12.5]),
+				bounds=([0.000*max, 0.5*max, 1.0, 1.0, 50, 2.5],[max, 2*max, 15.0, 15.0, 82, 35]),
 				method='dogbox',
 				max_nfev=10000
 				)
@@ -167,7 +167,7 @@ while line_num < len(shifts_ppm):
 		fit_font = {'fontname':'monospace', 'size':'9'}
 
 
-                xpredict = np.arange(0, 66.0, 0.01)
+                xpredict = np.arange(0, 130.0, 0.01)
                 ypredict = pyruvate_func(xpredict, p[0], p[1], p[2], p[3], p[4], p[5])
 
 
@@ -266,7 +266,7 @@ for aa in spectra_amino_dic:
 	plt.savefig('fittings_hr/Space_For_'+three_aa+'.pdf')
 	plt.close()
 	aa_space = aa_space + np.outer(y,n)
-	#aa_space = aa_space/aa_space.max()
+	aa_space = aa_space/aa_space.max()
 #print y, n 
 	#plt.imshow(aa_space, cmap='Greys')
 

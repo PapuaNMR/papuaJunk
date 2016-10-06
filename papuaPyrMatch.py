@@ -115,14 +115,13 @@ xsw_ppm = ((dic['FDF2FTSIZE']/xn)*(dic['FDF2SW']/dic['FDF2OBS']))
 ysw_ppm = dic['FDF3SW']/dic['FDF3OBS']
 zsw_ppm = dic['FDF1SW']/dic['FDF1OBS']
 
-
-print xsw_ppm, xcar_ppm, ysw_ppm, ycar_ppm, zsw_ppm, zcar_ppm
-
+lines = []
+#print xsw_ppm, xcar_ppm, ysw_ppm, ycar_ppm, zsw_ppm, zcar_ppm
 for system in res:
 	if system[2] != 'no assignment' and len(system[2]) > 1:
 		for CA in CAcoord:
 			if CA[0] == system[1]:
-				print CA[0], 'CA:', CA[1], CA[2], CA[3]
+				#print CA[0], 'CA:', CA[1], CA[2], CA[3]
 				CA_x_shift_ppm, CA_y_shift_ppm, CA_z_shift_ppm = CA[3], CA[1], CA[2]
 				CA_x_right_ppm = xcar_ppm + 0.5*xsw_ppm
 				x_point = round((1.0-((CA_x_shift_ppm - xcar_ppm)/(CA_x_right_ppm - xcar_ppm)))*(0.5*dic['FDF2FTSIZE']) - dic['FDF2X1'] + 0.0)
@@ -131,20 +130,21 @@ for system in res:
 
 				bestCoord = [z_point, x_point]
 				maxCa = 0
-				for i in [x_point-2, x_point-1, x_point, x_point+1, x_point+2]:
-					for j in [z_point-2, z_point-1, z_point, z_point+1, z_point+2]:
-						CaLine = data3D[j,(y_point-14):(y_point+15),i]
+				for i in np.arange(x_point, x_point+1):
+					for j in np.arange(z_point, z_point+1):
+						CaLine = data3D[j,(y_point-3*14):(y_point+3*14+1),i]
 						if CaLine.max() > maxCa:
 							maxCa = CaLine.max()
 							bestCoord = [j, i]
 				z_point, x_point = bestCoord
-				maxy_point = data3D[z_point, (y_point-14):(y_point+15), x_point].argmax()
-				y_point = y_point+maxy_point-14
+				maxy_point = data3D[z_point, (y_point-3*14):(y_point+3*14+1), x_point].argmax()
+				y_point = y_point+maxy_point-3*14
 				[CA_x_point, CA_y_point, CA_z_point] = [x_point, y_point, z_point]
-				CApeak = data3D[CA_z_point,(CA_y_point-14):(CA_y_point+15),CA_x_point]
+				CApeak = data3D[CA_z_point,(CA_y_point-3*14):(CA_y_point+3*14+1),CA_x_point]
 				CAmax = max(CApeak)
-				x = np.arange(29.0)
-				plt.plot(x,CApeak, linewidth=5.0)
+				x = np.arange(3*28.0+1)
+				lines += plt.plot(x,CApeak, label=str(system[1]), linewidth=5.0)
+				center_for_m1 = y_point
 
 		l2norm = [0,100000000000000000000,0]
 		for match in system[2]:
@@ -158,36 +158,38 @@ for system in res:
 					z_point = round(dic['FDF1FTSIZE']/2.0 + ((zcar_ppm - CAm1_z_shift_ppm)/zsw_ppm)*dic['FDF1FTSIZE'] - 1.0)
 					bestCoord = [z_point, x_point]
 					maxCa = 0
+				
+					y_point = center_for_m1
 					
-					
-					for fiddle in np.arange(-1,2):
+					for fiddle in np.arange(1):
 						#print y_point 
-						y_point_f = y_point + fiddle	
+						y_point_f = y_point # + fiddle	
 						#print y_point_f
-						for i in [x_point-2, x_point-1, x_point, x_point+1, x_point+2]:
-							for j in [z_point-2, z_point-1, z_point, z_point+1, z_point+2]:
-								CaLine = data3D[j,(y_point_f-14):(y_point_f+15),i]
+						for i in np.arange(x_point, x_point+1):
+							for j in np.arange(z_point, z_point+1):
+								CaLine = data3D[j,(y_point_f-3*14):(y_point_f+3*14+1),i]
 								if CaLine.max() > maxCa:
 									maxCa = CaLine.max()
 									bestCoord = [j, i]
 						z_point, x_point = bestCoord
-						maxy_point = data3D[z_point, (y_point_f-14):(y_point_f+15), x_point].argmax()
-						y_point_f = y_point_f+maxy_point-14+fiddle
+						#maxy_point = data3D[z_point, (y_point_f-1*14):(y_point_f+1*14+1), x_point].argmax()
+						#y_point_f = y_point_f+maxy_point-1*14+fiddle
 						[CAm1_x_point, CAm1_y_point, CAm1_z_point] = [x_point, y_point_f, z_point]
-						CAm1peak = data3D[CAm1_z_point,(CAm1_y_point-14):(CAm1_y_point+15),CAm1_x_point]
+						CAm1peak = data3D[CAm1_z_point,(CAm1_y_point-3*14):(CAm1_y_point+3*14+1),CAm1_x_point]
 						CAm1max = max(CAm1peak)
 						CAm1peak = CAm1peak * (CAmax/CAm1max)
-						x = np.arange(29.0)
+						x = np.arange(3*28.0+1)
 						if fiddle == 0:
-							plt.plot(x,CAm1peak, linewidth=2.0)
+							lines += plt.plot(x,CAm1peak, label=str(match[0]), linewidth=2.0)
 						if (CApeak - CAm1peak).std() < l2norm[1]:
 							l2norm[1] = (CApeak - CAm1peak).std()
 							l2norm[0] = CAm1[0]
 							l2norm[2] = fiddle
 		print l2norm	
-	
+	labels = [l.get_label() for l in lines]
+	plt.legend(labels)	
 	plt.show()
-
+	lines = []
 
 #for CA in CAcoord:
 #	for CAm1 in CAm1coord:
