@@ -1,1 +1,0 @@
-parallel -j 100% './ist.csh {} > /dev/null ; echo {}' ::: yzx/data*.dat
