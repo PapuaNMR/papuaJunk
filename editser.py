@@ -25,7 +25,7 @@ def getArgs():
 
 def getSerialFile(file):
 
-	ser = open(file, 'rb')
+	ser = open('ser', 'rb')
 	ser_data = ser.read()
 	
 	return ser_data
@@ -41,7 +41,7 @@ def reduceSerialData(fid_size, fid_list, ser_data):
 
 
 def writeTruncData(reduced_data, fid_name):
-	tr = open(fid_name+'.reduced', 'wb')
+	tr = open('ser'+'.reduced', 'wb')
 	tr.write(reduced_data)
 
 
